@@ -1,0 +1,77 @@
+##use google map api and lat and long from part 4
+##create new url with api and the lat and long
+import urllib.request
+import os
+import csv
+import re
+import webbrowser
+import datetime
+url='http://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=2016-09-23%2000:00:00&endtime=2016-09-30%2023:59:59&minmagnitude=4.5&eventtype=earthquake&orderby=time'
+def getQuakeData(url):
+    print("Attempting to access the page at this URL:", url)
+    web_page=urllib.request.urlopen(url)
+    lines = web_page.read().decode(errors="replace")
+    web_page.close()
+    lines=lines.split("\n")
+    print(lines)
+getQuakeData('http://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=2016-09-23%2000:00:00&endtime=2016-09-30%2023:59:59&minmagnitude=4.5&eventtype=earthquake&orderby=time')
+print("*"*25,"Part Two","*"*25)
+def getQuakeData(url):
+    print("Attempting to access the page at this URL:", url)
+    web_page=urllib.request.urlopen(url)
+    writelines = web_page.read().decode(errors="replace").split("\n")
+    web_page.close()
+    limit= 10
+    for entry in range(0, int(limit)+1):
+        print(writelines[entry])
+getQuakeData('http://earthquake.usgs.gov/fdsnws/event/1/query.csv?starttime=2016-09-23%2000:00:00&endtime=2016-09-30%2023:59:59&minmagnitude=4.5&eventtype=earthquake&orderby=magnitude')
+##
+
+print("*"*25,"Part Three","*"*25)
+fileData=csv.DictReader(open("query.csv","r"))
+data=[]
+for line in fileData:
+    data.append(line)
+    
+def getTopQuakes(data):
+    quakeTopList=[]
+    topQuake=[(float(entry["mag"]),entry["id"]) for entry in data]
+    orderList = sorted(topQuake, reverse=True)
+    for element in orderList[:10]:
+        for entry in data:
+            if str(entry["id"])==str(element[1]):
+                quakeTopList.append(entry)
+    return(quakeTopList)
+#variable for part three before creating a formating system
+topList=getTopQuakes(data)
+print("{0:<12}{1:<10}{2:<50}{3:<15}".format("ID","Mag","Location","Time"))
+print("-"*100)
+
+for entry in topList:
+    print("{0:<12}{1:<10}{2:<50}{3:<15}".format(entry["id"],entry["mag"],entry["place"],entry["time"]))
+getTopQuakes(data)
+print()
+
+##input id then it will dive u greated details of what the id info is
+##reutnrs lat and long because we eed for part 5 making the map with api
+print("*"*25,"Part Four","*"*25)
+quakeDets=input("what id are you searching for?")
+def getQuakeDetails(quakeDets):
+    for entry in data:
+        if entry["id"]==quakeDets:
+            print("{0:<12}{1:<10}{2:<50}{3:<25}{4:<25}{5:<15}".format("Mag","Location","Latitude","Longitude","Time"))
+            print("-"*100)
+            print("{0:<12}{1:<10}{2:<50}{3:<25}{4:<25}{5:<15}".format(entry["id"],entry["place"],entry["latitude"],entry["longitude"],entry["time"]))
+        return entry["latitude"],entry["longitude"]
+getQuakeDetails(quakeDets)
+
+print("*"*25,"Part Five","*"*25)
+chooseMap=input("Do you want to open this on a map? [Y/N] ")
+if chooseMap.upper()=="Y":
+    print("Opening Map...")
+    for entry in data:
+        if entry ["id"]==quakeDets:
+            website="https://maps.googleapis.com/maps/api/staticmap?center="+entry["latitude"]+entry["longitude"]+"zoom=9&markers"+entry["latitude"]+entry["longitude"]+"&size=640x640&scale=2&key=AIzaSyADS8f73GSJVtMPMkqCz2bNDoWVrphV5GM"
+            webbrowser.open(website)
+else:
+    print("No map selected")
